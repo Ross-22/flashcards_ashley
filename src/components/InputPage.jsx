@@ -45,8 +45,10 @@ For key concepts:
 
 For flashcards:
 - Create exactly ${flashcardCount} flashcards that test understanding of the summarized concepts
+- The details of the flashcard questions should be concise and to the point. 
 - Use different question types: definition, application, comparison, analysis
-- Provide answers that explain the concepts clearly
+- Provide answers that explain the concepts clearly.
+- The answers should be concise and straight forward. It should not exceed 20 words each.
 - Do NOT copy text directly from the original lesson
 
 For quiz questions:

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { useLocation } from 'react-router-dom'
+import { useLocation, Link } from 'react-router-dom'
 
 const FlashcardPage = ({ flashcards }) => {
   const location = useLocation()
@@ -29,6 +29,11 @@ const FlashcardPage = ({ flashcards }) => {
             <p className="card-subtitle">Get started by creating your first set of flashcards</p>
           </div>
           <p>Go to the "Create Flashcards" page to add some flashcards!</p>
+          <div style={{ textAlign: 'center', marginTop: '2rem' }}>
+            <Link to="/input" className="btn btn-lg">
+              Create Your First Flashcards
+            </Link>
+          </div>
         </div>
       </div>
     )
@@ -49,6 +54,7 @@ const FlashcardPage = ({ flashcards }) => {
   const handleFlip = () => {
     setIsFlipped(!isFlipped)
   }
+
 
   return (
     <div>
@@ -81,10 +87,14 @@ const FlashcardPage = ({ flashcards }) => {
             onClick={handleFlip}
           >
             <div className="flashcard-front">
-              {currentCard.question}
+              <div className="flashcard-content">
+                {currentCard.question}
+              </div>
             </div>
             <div className="flashcard-back">
-              {currentCard.answer}
+              <div className="flashcard-content">
+                {currentCard.answer}
+              </div>
             </div>
             <div className="flashcard-hint">
               Click to flip

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { 
   getAllFlashcards, 
   getAllQuizzes, 
@@ -280,6 +280,11 @@ const LibraryPage = () => {
               <div className="empty-state">
                 <h3>No flashcards yet</h3>
                 <p>Create your first set of flashcards to see them here!</p>
+                <div style={{ textAlign: 'center', marginTop: '2rem' }}>
+                  <Link to="/input" className="btn btn-lg">
+                    Create Your First Flashcards
+                  </Link>
+                </div>
               </div>
             ) : (
               <div className="grid">
@@ -428,6 +433,11 @@ const LibraryPage = () => {
               <div className="empty-state">
                 <h3>No quizzes yet</h3>
                 <p>Create your first quiz to see it here!</p>
+                <div style={{ textAlign: 'center', marginTop: '2rem' }}>
+                  <Link to="/input" className="btn btn-lg">
+                    Create Your First Quiz
+                  </Link>
+                </div>
               </div>
             ) : (
               <div className="grid">

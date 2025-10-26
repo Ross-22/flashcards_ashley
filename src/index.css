@@ -52,6 +52,7 @@ body {
   max-width: 1200px;
   margin: 0 auto;
   padding: 1rem 20px;
+  position: relative;
 }
 
 .nav-brand {
@@ -59,9 +60,53 @@ body {
   font-weight: 700;
   color: var(--primary-color);
   text-decoration: none;
+  z-index: 1002;
 }
 
-.nav-links {
+/* Mobile Menu Toggle */
+.mobile-menu-toggle {
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 44px;
+  height: 44px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  z-index: 1002;
+  position: relative;
+}
+
+.mobile-menu-toggle span {
+  display: block;
+  width: 24px;
+  height: 2px;
+  background: var(--text-dark);
+  margin: 3px 0;
+  transition: var(--transition);
+  transform-origin: center;
+}
+
+.mobile-menu-toggle.active span:nth-child(1) {
+  transform: rotate(45deg) translate(6px, 6px);
+}
+
+.mobile-menu-toggle.active span:nth-child(2) {
+  opacity: 0;
+}
+
+.mobile-menu-toggle.active span:nth-child(3) {
+  transform: rotate(-45deg) translate(6px, -6px);
+}
+
+.mobile-menu-toggle:hover span {
+  background: var(--primary-color);
+}
+
+/* Desktop Navigation */
+.desktop-nav {
   display: flex;
   gap: 2rem;
   align-items: center;
@@ -75,6 +120,7 @@ body {
   border-radius: var(--border-radius-sm);
   transition: var(--transition);
   position: relative;
+  white-space: nowrap;
 }
 
 .nav-link:hover {
@@ -85,6 +131,74 @@ body {
 .nav-link.active {
   color: var(--primary-color);
   background: rgba(44, 90, 160, 0.1);
+}
+
+/* Mobile Navigation Overlay */
+.mobile-nav-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 999;
+  opacity: 0;
+  visibility: hidden;
+  transition: var(--transition);
+}
+
+.mobile-nav-overlay.active {
+  opacity: 1;
+  visibility: visible;
+}
+
+.mobile-nav-content {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 280px;
+  height: 100%;
+  background: white;
+  box-shadow: var(--shadow-heavy);
+  transform: translateX(100%);
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  flex-direction: column;
+  padding: 80px 0 20px 0;
+}
+
+.mobile-nav-overlay.active .mobile-nav-content {
+  transform: translateX(0);
+}
+
+.mobile-nav-links {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0 1.5rem;
+}
+
+.mobile-nav-link {
+  display: block;
+  padding: 1rem 1.25rem;
+  color: var(--text-dark);
+  text-decoration: none;
+  font-weight: 500;
+  border-radius: var(--border-radius-sm);
+  transition: var(--transition);
+  font-size: 1.1rem;
+  border: 1px solid transparent;
+}
+
+.mobile-nav-link:hover {
+  color: var(--primary-color);
+  background: var(--secondary-color);
+  border-color: var(--border-color);
+}
+
+.mobile-nav-link:active {
+  background: rgba(44, 90, 160, 0.1);
+  transform: scale(0.98);
 }
 
 /* Cards */
@@ -236,6 +350,33 @@ body {
   overflow-y: auto;
   overflow-x: hidden;
   text-align: left;
+  /* Improved scrolling for mobile */
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
+}
+
+/* Custom scrollbar for webkit browsers */
+.flashcard-front::-webkit-scrollbar,
+.flashcard-back::-webkit-scrollbar {
+  width: 6px;
+}
+
+.flashcard-front::-webkit-scrollbar-track,
+.flashcard-back::-webkit-scrollbar-track {
+  background: transparent;
+  border-radius: 3px;
+}
+
+.flashcard-front::-webkit-scrollbar-thumb,
+.flashcard-back::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 3px;
+}
+
+.flashcard-front::-webkit-scrollbar-thumb:hover,
+.flashcard-back::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.3);
 }
 
 .flashcard-front {
@@ -576,14 +717,30 @@ body {
   flex-shrink: 0;
 }
 
-.nav-links {
-  display: flex;
-  gap: 0.5rem;
-  align-items: center;
-  flex-wrap: wrap;
-  justify-content: flex-end;
-  flex: 1;
-  min-width: 0; /* Allow shrinking */
+/* Mobile Menu Toggle - Show on mobile */
+@media (max-width: 768px) {
+  .mobile-menu-toggle {
+    display: flex;
+  }
+  
+  .desktop-nav {
+    display: none;
+  }
+}
+
+/* Desktop Navigation - Show on larger screens */
+@media (min-width: 769px) {
+  .mobile-menu-toggle {
+    display: none;
+  }
+  
+  .mobile-nav-overlay {
+    display: none;
+  }
+  
+  .desktop-nav {
+    display: flex;
+  }
 }
 
 .nav-link {
@@ -688,6 +845,11 @@ body {
   position: relative;
   border: 1px solid var(--border-color);
   touch-action: manipulation; /* Improve touch scrolling */
+  /* Prevent text selection on mobile */
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
 }
 
 .flashcard-front,
@@ -697,17 +859,67 @@ body {
   height: 100%;
   backface-visibility: hidden;
   display: flex;
-  align-items: flex-start;
-  justify-content: flex-start;
+  align-items: center;
+  justify-content: center;
   border-radius: var(--border-radius);
   padding: 2rem;
   top: 0;
   left: 0;
   word-wrap: break-word;
   overflow-wrap: break-word;
-  overflow-y: auto;
-  overflow-x: hidden;
-  text-align: left;
+  overflow: hidden;
+  text-align: center;
+  /* Allow text selection for content */
+  -webkit-user-select: text;
+  -moz-user-select: text;
+  -ms-user-select: text;
+  user-select: text;
+}
+
+/* Flashcard content wrapper */
+.flashcard-content {
+  width: 100%;
+  max-height: 100%;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  line-height: 1.4;
+}
+
+/* Ensure flashcard hint stays at bottom */
+.flashcard-hint {
+  position: absolute;
+  bottom: 1rem;
+  right: 1rem;
+  color: var(--text-light);
+  font-size: 0.8rem;
+  z-index: 10;
+  pointer-events: none;
+}
+
+/* Custom scrollbar for webkit browsers */
+.flashcard-front::-webkit-scrollbar,
+.flashcard-back::-webkit-scrollbar {
+  width: 6px;
+}
+
+.flashcard-front::-webkit-scrollbar-track,
+.flashcard-back::-webkit-scrollbar-track {
+  background: transparent;
+  border-radius: 3px;
+}
+
+.flashcard-front::-webkit-scrollbar-thumb,
+.flashcard-back::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 3px;
+}
+
+.flashcard-front::-webkit-scrollbar-thumb:hover,
+.flashcard-back::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.3);
 }
 
 .quiz-option {
