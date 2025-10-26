@@ -1,0 +1,58 @@
+# Firestore Security Rules to Fix "Missing or insufficient permissions" Error
+
+## Option 1: Public Access (Development Only)
+Use these rules for development/testing. They allow anyone to read and write to your database:
+
+```
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /{document=**} {
+      allow read, write: if true;
+    }
+  }
+}
+```
+
+## Option 2: Time-limited Public Access
+More secure than Option 1, allows public access for a limited time:
+
+```
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /{document=**} {
+      allow read, write: if request.time < timestamp.date(2025, 12, 31);
+    }
+  }
+}
+```
+
+## Option 3: Implement Authentication (Recommended for Production)
+If you want to add authentication later, use these rules:
+
+```
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /{document=**} {
+      allow read, write: if request.auth != null;
+    }
+  }
+}
+```
+
+## How to Update Firestore Rules:
+
+1. Go to the Firebase Console (https://console.firebase.google.com/)
+2. Select your project: "flashcards-174c8"
+3. Go to Firestore Database in the left sidebar
+4. Click on "Rules" tab
+5. Replace the existing rules with one of the options above
+6. Click "Publish"
+
+## For Quick Testing:
+Use Option 1 rules to immediately fix the permissions error. You can always update them later for production.
+
+## Current Issue:
+Your app is trying to save flashcards without authentication, but your Firestore rules likely require authentication. The rules above will resolve the permissions error.
