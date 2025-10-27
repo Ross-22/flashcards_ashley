@@ -1,44 +1,33 @@
-import React, { useState, useEffect } from 'react'
-import { useLocation } from 'react-router-dom'
+import React, { useState, useEffect } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom'; // Added useNavigate for potential navigation
 
 const QuizPage = ({ questions }) => {
-  const location = useLocation()
-  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0)
-  const [selectedOption, setSelectedOption] = useState(null)
-  const [score, setScore] = useState(0)
-  const [showResults, setShowResults] = useState(false)
-  const [quizStarted, setQuizStarted] = useState(false)
-  const [displayQuestions, setDisplayQuestions] = useState(questions)
+  const location = useLocation();
+  const navigate = useNavigate(); // Initialize useNavigate
+  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+  const [selectedOption, setSelectedOption] = useState(null);
+  const [score, setScore] = useState(0);
+  const [showResults, setShowResults] = useState(false);
+  const [quizStarted, setQuizStarted] = useState(false);
+  const [displayQuestions, setDisplayQuestions] = useState([]); // Initialize as empty array
 
   useEffect(() => {
     // Check if questions were passed via navigation state
     if (location.state && location.state.questions) {
-      setDisplayQuestions(location.state.questions)
+      setDisplayQuestions(location.state.questions);
+      setQuizStarted(true); // Assume quiz starts if questions are provided
+    } else if (questions && questions.length > 0) {
+      setDisplayQuestions(questions);
+      setQuizStarted(true); // Assume quiz starts if questions are provided via prop
     } else {
-      setDisplayQuestions(questions)
+      // If no questions are available, maybe navigate back or show a message
+      console.error("No questions available for the quiz.");
+      // Optionally navigate back to a previous page or show an error message
+      // navigate('/some-fallback-page');
     }
-  }, [location.state, questions])
+  }, [location.state, questions, navigate]); // Added navigate to dependency array
 
-  if (displayQuestions.length === 0) {
-    return (
-      <div>
-        <div className="hero">
-          <h1 className="hero-title">Quiz</h1>
-          <p className="hero-subtitle">Test your knowledge with interactive quizzes generated from your flashcards</p>
-        </div>
-        <div className="card">
-          <div className="card-header">
-            <h2 className="card-title">No Quiz Questions Available</h2>
-            <p className="card-subtitle">Get started by creating flashcards first</p>
-          </div>
-          <p>Go to the "Create Flashcards" page to generate some quiz questions first!</p>
-        </div>
-      </div>
-    )
-  }
-
-  const currentQuestion = displayQuestions[currentQuestionIndex]
-
+<<<<<<< HEAD
   const handleOptionSelect = (optionIndex) => {
     if (showResults) return
     setSelectedOption(optionIndex)
@@ -52,165 +41,87 @@ const QuizPage = ({ questions }) => {
     
     if (selectedOption === correctAnswerIndex) {
       setScore(prev => prev + 1)
+=======
+  const handleOptionSelect = (option) => {
+    setSelectedOption(option);
+  };
+
+  const handleNextQuestion = () => {
+    const isCorrect = displayQuestions[currentQuestionIndex].correctAnswer === selectedOption;
+    if (isCorrect) {
+      setScore(score + 1);
+>>>>>>> 496d616b8cb4c226950cfba6d40e7ce358799200
     }
 
-    if (currentQuestionIndex < displayQuestions.length - 1) {
-      setCurrentQuestionIndex(prev => prev + 1)
-      setSelectedOption(null)
+    setSelectedOption(null); // Reset selection for the next question
+
+    if (currentQuestionIndex + 1 < displayQuestions.length) {
+      setCurrentQuestionIndex(currentQuestionIndex + 1);
     } else {
-      setShowResults(true)
+      setShowResults(true); // End of quiz, show results
     }
-  }
+  };
 
   const handleRestartQuiz = () => {
-    setCurrentQuestionIndex(0)
-    setSelectedOption(null)
-    setScore(0)
-    setShowResults(false)
-    setQuizStarted(false)
-  }
+    setCurrentQuestionIndex(0);
+    setSelectedOption(null);
+    setScore(0);
+    setShowResults(false);
+    setQuizStarted(true); // Ensure quiz is marked as started
+    // If questions were loaded from state, they should still be there.
+    // If they were from props and might change, you might need to re-fetch or re-initialize.
+  };
 
-  const handleStartQuiz = () => {
-    setQuizStarted(true)
-  }
-
-  if (!quizStarted) {
-    return (
-      <div>
-        <div className="hero">
-          <h1 className="hero-title">Quiz</h1>
-          <p className="hero-subtitle">Test your knowledge with interactive quizzes generated from your flashcards</p>
-        </div>
-        <div className="card">
-          <div className="card-header">
-            <h2 className="card-title">Interactive Quiz</h2>
-            <p className="card-subtitle">Test your knowledge with {displayQuestions.length} questions generated from your flashcards.</p>
-          </div>
-          <div className="quiz-question">
-            <div className="quiz-question-header">
-              <div className="quiz-question-number">Instructions</div>
-              <h3 className="quiz-question-text">How to take the quiz</h3>
-            </div>
-            <ul style={{ marginLeft: '1.5rem', lineHeight: '1.6', color: 'var(--text-light)' }}>
-              <li>Read each question carefully</li>
-              <li>Select the correct answer from the options</li>
-              <li>You'll see your score at the end</li>
-              <li>You can restart the quiz anytime</li>
-            </ul>
-            <div style={{ textAlign: 'center', marginTop: '2rem' }}>
-              <button className="btn btn-lg" onClick={handleStartQuiz}>
-                🚀 Start Quiz
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-    )
-  }
-
-  if (showResults) {
-    const percentage = Math.round((score / displayQuestions.length) * 100)
-    return (
-      <div>
-        <div className="hero">
-          <h1 className="hero-title">Quiz Results</h1>
-          <p className="hero-subtitle">See how well you performed on the quiz</p>
-        </div>
-        <div className="card">
-          <div className="card-header">
-            <h2 className="card-title">Your Performance</h2>
-          </div>
-          <div className="score-display">
-            {score} / {displayQuestions.length} ({percentage}%)
-          </div>
-          
-          <div style={{ textAlign: 'center', margin: '2rem 0' }}>
-            {percentage >= 80 && <p style={{ color: 'var(--accent-color)', fontSize: '1.25rem', fontWeight: '600' }}>Excellent! 🎉</p>}
-            {percentage >= 60 && percentage < 80 && <p style={{ color: '#ffc107', fontSize: '1.25rem', fontWeight: '600' }}>Good job! 👍</p>}
-            {percentage < 60 && <p style={{ color: '#dc3545', fontSize: '1.25rem', fontWeight: '600' }}>Keep practicing! 📚</p>}
-          </div>
-
-          <div className="quiz-question">
-            <div className="quiz-question-header">
-              <h3 className="quiz-question-text">Question Review</h3>
-            </div>
-            {displayQuestions.map((question, index) => (
-              <div key={question.id} className="card" style={{ marginBottom: '1rem', padding: '1.5rem', background: 'var(--secondary-color)' }}>
-                <p><strong>Q{index + 1}:</strong> {question.question}</p>
-                <p style={{ marginTop: '0.5rem', color: 'var(--primary-color)' }}><strong>Correct Answer:</strong> {question.correctAnswer}</p>
-              </div>
-            ))}
-          </div>
-
-          <div style={{ textAlign: 'center', marginTop: '2rem' }}>
-            <button className="btn btn-lg" onClick={handleRestartQuiz}>
-              🔄 Restart Quiz
-            </button>
-          </div>
-        </div>
-      </div>
-    )
+  if (!quizStarted || displayQuestions.length === 0) {
+    return <div>Loading quiz... or no questions available.</div>; // Or navigate away
   }
 
   return (
-    <div>
-      <div className="hero">
-        <h1 className="hero-title">Quiz</h1>
-        <p className="hero-subtitle">Test your knowledge with interactive quizzes</p>
-      </div>
-
-      <div className="card">
-        <div className="card-header">
-          <h2 className="card-title">Interactive Quiz</h2>
-          <p className="card-subtitle">Question {currentQuestionIndex + 1} of {displayQuestions.length}</p>
-        </div>
-        
-        <div className="progress-container">
-          <div className="progress-bar">
-          <div 
-            className="progress-fill" 
-            style={{ width: `${((currentQuestionIndex + 1) / displayQuestions.length) * 100}%` }}
-          ></div>
-        </div>
-        <div style={{ textAlign: 'center', color: 'var(--text-light)', fontSize: '0.9rem' }}>
-          Progress: {currentQuestionIndex + 1} of {displayQuestions.length}
-          </div>
-        </div>
-
-        <div className="quiz-question">
-          <div className="quiz-question-header">
-            <div className="quiz-question-number">Question {currentQuestionIndex + 1}</div>
-            <h3 className="quiz-question-text">{currentQuestion.question}</h3>
-          </div>
-          
-          <div className="quiz-options">
-            {currentQuestion.options.map((option, index) => (
-              <div
+    <div className="quiz-container">
+      {!showResults ? (
+        <div>
+          <h2>Question {currentQuestionIndex + 1} of {displayQuestions.length}</h2>
+          <p>{displayQuestions[currentQuestionIndex].question}</p>
+          <div className="options-container">
+            {displayQuestions[currentQuestionIndex].options.map((option, index) => (
+              <button
                 key={index}
+<<<<<<< HEAD
                 className={`quiz-option ${
                   selectedOption === index ? 'selected' : ''
                 }`}
                 onClick={() => handleOptionSelect(index)}
+=======
+                className={`option-button ${selectedOption === option ? 'selected' : ''}`}
+                onClick={() => handleOptionSelect(option)}
+>>>>>>> 496d616b8cb4c226950cfba6d40e7ce358799200
               >
                 {option}
-              </div>
+              </button>
             ))}
           </div>
-
-          <div style={{ textAlign: 'center', marginTop: '2rem' }}>
-            <button 
-              className="btn btn-lg" 
-              onClick={handleSubmitAnswer}
-              disabled={selectedOption === null}
-            >
-              {currentQuestionIndex < displayQuestions.length - 1 ? 'Next Question →' : 'Finish Quiz 🏁'}
+          {selectedOption && (
+            <button onClick={handleNextQuestion}>
+              {currentQuestionIndex + 1 < displayQuestions.length ? 'Next Question' : 'Show Results'}
             </button>
-          </div>
+          )}
         </div>
+<<<<<<< HEAD
 
       </div>
+=======
+      ) : (
+        <div className="results-container">
+          <h2>Quiz Results</h2>
+          <p>Your score: {score} out of {displayQuestions.length}</p>
+          <button onClick={handleRestartQuiz}>Restart Quiz</button>
+          {/* Optionally, add a button to go back to the library or home */}
+          {/* <button onClick={() => navigate('/library')}>Go to Library</button> */}
+        </div>
+      )}
+>>>>>>> 496d616b8cb4c226950cfba6d40e7ce358799200
     </div>
-  )
-}
+  );
+};
 
-export default QuizPage
+export default QuizPage;
