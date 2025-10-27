@@ -13,9 +13,11 @@ const QuizPage = ({ questions }) => {
 
   useEffect(() => {
     if (location.state && location.state.questions) {
+      console.log('Questions from location state:', location.state.questions);
       setDisplayQuestions(location.state.questions);
       setQuizStarted(true);
     } else if (questions && questions.length > 0) {
+      console.log('Questions from props:', questions);
       setDisplayQuestions(questions);
       setQuizStarted(true);
     } else {
@@ -32,10 +34,19 @@ const QuizPage = ({ questions }) => {
     if (selectedOption === null) return;
 
     const currentQuestion = displayQuestions[currentQuestionIndex];
+    console.log('Current question:', currentQuestion);
+    console.log('Selected option index:', selectedOption);
+    console.log('Correct answer string:', currentQuestion.correctAnswer);
+    
+    // Convert letter answer (A, B, C, D) to index (0, 1, 2, 3)
     const correctAnswerIndex = currentQuestion.correctAnswer.charCodeAt(0) - 65; // A=0, B=1, C=2, D=3
+    console.log('Correct answer index:', correctAnswerIndex);
     
     if (selectedOption === correctAnswerIndex) {
+      console.log('Answer is correct!');
       setScore(prev => prev + 1);
+    } else {
+      console.log('Answer is incorrect. Selected:', selectedOption, 'Correct:', correctAnswerIndex);
     }
 
     setSelectedOption(null);
