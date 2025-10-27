@@ -39,15 +39,18 @@ const QuizPage = ({ questions }) => {
 
   const currentQuestion = displayQuestions[currentQuestionIndex]
 
-  const handleOptionSelect = (option) => {
+  const handleOptionSelect = (optionIndex) => {
     if (showResults) return
-    setSelectedOption(option)
+    setSelectedOption(optionIndex)
   }
 
   const handleSubmitAnswer = () => {
     if (selectedOption === null) return
 
-    if (selectedOption === currentQuestion.correctAnswer) {
+    // Convert the correct answer letter (A, B, C, D) to an index (0, 1, 2, 3)
+    const correctAnswerIndex = currentQuestion.correctAnswer.charCodeAt(0) - 65 // A=0, B=1, C=2, D=3
+    
+    if (selectedOption === correctAnswerIndex) {
       setScore(prev => prev + 1)
     }
 
@@ -185,9 +188,9 @@ const QuizPage = ({ questions }) => {
               <div
                 key={index}
                 className={`quiz-option ${
-                  selectedOption === option ? 'selected' : ''
+                  selectedOption === index ? 'selected' : ''
                 }`}
-                onClick={() => handleOptionSelect(option)}
+                onClick={() => handleOptionSelect(index)}
               >
                 {option}
               </div>
@@ -205,9 +208,6 @@ const QuizPage = ({ questions }) => {
           </div>
         </div>
 
-        <div className="score-display">
-          Current Score: {score} / {currentQuestionIndex}
-        </div>
       </div>
     </div>
   )
