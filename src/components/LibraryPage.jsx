@@ -8,6 +8,7 @@ import {
   updateFlashcardSet, 
   updateQuiz 
 } from '../services/firestoreService';
+import DeleteConfirmationPopup from './DeleteConfirmationPopup';
 
 const LibraryPage = () => {
   const navigate = useNavigate();
@@ -21,6 +22,13 @@ const LibraryPage = () => {
   const [editingItem, setEditingItem] = useState(null);
   const [editText, setEditText] = useState('');
   const [actionLoading, setActionLoading] = useState(false);
+  const [deletePopup, setDeletePopup] = useState({
+    isOpen: false,
+    itemId: null,
+    itemType: null,
+    itemName: '',
+    isLoading: false
+  });
 
   useEffect(() => {
     loadLibraryData();
@@ -112,43 +120,66 @@ const LibraryPage = () => {
     setSelectedQuizzes([]);
   };
 
-  // Delete functions
-  const handleDeleteFlashcardSet = async (setId, event) => {
-    event.stopPropagation();
-    if (!window.confirm('Are you sure you want to delete this flashcard set? This action cannot be undone.')) {
-      return;
-    }
+  // Delete popup functions
+  const openDeletePopup = (itemId, itemType, itemName) => {
+    setDeletePopup({
+      isOpen: true,
+      itemId,
+      itemType,
+      itemName,
+      isLoading: false
+    });
+  };
+
+  const closeDeletePopup = () => {
+    setDeletePopup({
+      isOpen: false,
+      itemId: null,
+      itemType: null,
+      itemName: '',
+      isLoading: false
+    });
+  };
+
+  const handleDeleteConfirm = async () => {
+    const { itemId, itemType } = deletePopup;
+    
+    if (!itemId || !itemType) return;
 
     try {
-      setActionLoading(true);
-      await deleteFlashcardSet(setId);
-      setFlashcards(prev => prev.filter(set => set.id !== setId));
-      setSelectedFlashcards(prev => prev.filter(id => id !== setId));
+      setDeletePopup(prev => ({ ...prev, isLoading: true }));
+      
+      if (itemType === 'flashcard') {
+        await deleteFlashcardSet(itemId);
+        setFlashcards(prev => prev.filter(set => set.id !== itemId));
+        setSelectedFlashcards(prev => prev.filter(id => id !== itemId));
+      } else if (itemType === 'quiz') {
+        await deleteQuiz(itemId);
+        setQuizzes(prev => prev.filter(quiz => quiz.id !== itemId));
+        setSelectedQuizzes(prev => prev.filter(id => id !== itemId));
+      }
+      
+      closeDeletePopup();
     } catch (err) {
-      console.error('Error deleting flashcard set:', err);
-      setError('Failed to delete flashcard set. Please try again.');
-    } finally {
-      setActionLoading(false);
+      console.error(`Error deleting ${itemType}:`, err);
+      setError(`Failed to delete ${itemType}. Please try again.`);
+      closeDeletePopup();
     }
   };
 
-  const handleDeleteQuiz = async (quizId, event) => {
+  // Delete button handlers
+  const handleDeleteFlashcardSet = (setId, event) => {
     event.stopPropagation();
-    if (!window.confirm('Are you sure you want to delete this quiz? This action cannot be undone.')) {
-      return;
-    }
+    const set = flashcards.find(s => s.id === setId);
+    const itemName = set?.summary ? truncateText(set.summary, 30) : 'Flashcard Set';
+    openDeletePopup(setId, 'flashcard', itemName);
+  };
 
-    try {
-      setActionLoading(true);
-      await deleteQuiz(quizId);
-      setQuizzes(prev => prev.filter(quiz => quiz.id !== quizId));
-      setSelectedQuizzes(prev => prev.filter(id => id !== quizId));
-    } catch (err) {
-      console.error('Error deleting quiz:', err);
-      setError('Failed to delete quiz. Please try again.');
-    } finally {
-      setActionLoading(false);
-    }
+  const handleDeleteQuiz = (quizId, event) => {
+    event.stopPropagation();
+    const quiz = quizzes.find(q => q.id === quizId);
+    const itemName = quiz?.summary ? truncateText(quiz.summary, 30) : 'Quiz';
+    openDeletePopup(quizId, 'quiz', itemName);
   };
 
   // Rename functions
@@ -592,6 +623,16 @@ const LibraryPage = () => {
           <li>Content is stored securely in the cloud</li>
         </ul>
       </div>
+
+      {/* Delete Confirmation Popup */}
+      <DeleteConfirmationPopup
+        isOpen={deletePopup.isOpen}
+        onClose={closeDeletePopup}
+        onConfirm={handleDeleteConfirm}
+        itemType={deletePopup.itemType}
+        itemName={deletePopup.itemName}
+        isLoading={deletePopup.isLoading}
+      />
     </div>
   );
 };
